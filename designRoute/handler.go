@@ -2,6 +2,8 @@ package designRoute
 
 import (
 	"net/http"
+
+	"gopkg.in/yaml.v2"
 )
 
 func buildMap(urls map[string]string) func(string) (string, bool) {
@@ -19,4 +21,21 @@ func MapHandler(routes func(string) (string, bool), m http.Handler) http.Handler
 			m.ServeHTTP(w, r)
 		}
 	}
+}
+
+func YAMLHandler(yml []byte, fallback http.Handler) (http.HandlerFunc, error) {
+	type pairs struct {
+		path string
+		url  string
+	}
+	type list struct {
+		li []pairs
+	}
+	var lis list
+	err := yaml.Unmarshal(yml, &lis)
+	lists := make(map[string]string, len(lis.li))
+	for _, e := range lis.li {
+		lists[e.path] = e.url
+	}
+	return MapHandler(buildMap(lists), fallback), err
 }
