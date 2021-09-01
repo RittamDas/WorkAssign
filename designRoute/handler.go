@@ -6,7 +6,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func buildMap(urls map[string]string) func(string) (string, bool) {
+func BuildMap(urls map[string]string) func(string) (string, bool) {
 	return func(path string) (string, bool) {
 		u, e := urls[path]
 		return u, e
@@ -24,18 +24,18 @@ func MapHandler(routes func(string) (string, bool), m http.Handler) http.Handler
 }
 
 func YAMLHandler(yml []byte, fallback http.Handler) (http.HandlerFunc, error) {
-	type pairs struct {
-		path string
-		url  string
+	type Pairs struct {
+		Path string
+		Url  string
 	}
-	type list struct {
-		li []pairs
+	type List struct {
+		Li []Pairs
 	}
-	var lis list
-	err := yaml.Unmarshal(yml, &lis)
-	lists := make(map[string]string, len(lis.li))
-	for _, e := range lis.li {
-		lists[e.path] = e.url
+	var Lis List
+	err := yaml.Unmarshal(yml, &Lis)
+	lists := make(map[string]string, len(Lis.Li))
+	for _, e := range Lis.Li {
+		lists[e.Path] = e.Url
 	}
-	return MapHandler(buildMap(lists), fallback), err
+	return MapHandler(BuildMap(lists), fallback), err
 }
