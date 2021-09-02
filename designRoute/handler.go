@@ -25,16 +25,19 @@ func MapHandler(routes func(string) (string, bool), m http.Handler) http.Handler
 
 func YAMLHandler(yml []byte, fallback http.Handler) (http.HandlerFunc, error) {
 	type Pairs struct {
-		Path string
-		Url  string
+		Path string `yaml:"path"`
+		Url  string `yaml:"url"`
 	}
-	type List struct {
+	/*type List struct {
 		Li []Pairs
-	}
-	var Lis List
+	}*/
+	var Lis []Pairs
 	err := yaml.Unmarshal(yml, &Lis)
-	lists := make(map[string]string, len(Lis.Li))
-	for _, e := range Lis.Li {
+	if err != nil {
+		panic(err)
+	}
+	lists := make(map[string]string, len(Lis))
+	for _, e := range Lis {
 		lists[e.Path] = e.Url
 	}
 	return MapHandler(BuildMap(lists), fallback), err
